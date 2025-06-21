@@ -1,0 +1,55 @@
+name: 🚧 Limitation Candidate
+description: Report a limitation you've identified in the ICP Vibe Coding Boilerplate
+title: "[LIMIT]: <title>"
+labels: ["limitation"]
+assignees:
+  - tiagoicp
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # ICP Vibe Coding Boilerplate Limitation Report
+
+        Thank you for taking the time to report a limitation in the boilerplate.
+        These reports help us improve the template for all developers.
+
+        Please complete the form below with as much detail as possible.
+
+  - type: textarea
+    id: limitation-description
+    attributes:
+      label: Limitation Description
+      description: Provide a clear and concise description of the limitation you've encountered
+      placeholder: When trying to... I discovered that the boilerplate cannot...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Identify/Reproduce
+      description: List the steps that allowed you to identify this limitation
+      placeholder: |
+        1. Created a function that...
+        2. Tried to implement...
+        3. Encountered limitation where...
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What would be the ideal behavior if this limitation didn't exist?
+      placeholder: Ideally, the boilerplate would be able to...
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severely does this limitation impact development?
+      options:
+        - Critical (completely blocks development)
+        - Major (significant workarounds needed)
+        - Moderate (workarounds possible but cumbersome)
+        - Minor (slight inconvenience)
+    validations:
+      required: true

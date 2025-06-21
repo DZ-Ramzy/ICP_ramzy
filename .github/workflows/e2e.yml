@@ -1,0 +1,64 @@
+name: End to End
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04]
+        ghc: ["8.8.4"]
+        spec:
+          - "0.16.1"
+        node:
+          - 20
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+
+      - name: Setup node v${{ matrix.node }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: NPM install
+        run: npm install
+
+      - name: Setup dfx
+        uses: dfinity/setup-dfx@main
+
+      - name: Install dfx
+        run: |
+          dfx start --background
+
+      - name: Build all canisters
+        run: |
+          dfx deploy
+          dfx stop
+
+      - name: Check Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+        env:
+          CI: true
+          REPLICA_PORT: 8000

@@ -1,0 +1,31 @@
+{
+  "canisters": {
+    "llm": {
+      "type": "pull",
+      "id": "w36hm-eqaaa-aaaal-qr76a-cai"
+    },
+    "backend": {
+      "dependencies": ["llm"],
+      "candid": "src/backend/backend.did",
+      "package": "backend",
+      "type": "custom",
+      "shrink": true,
+      "gzip": true,
+      "wasm": "target/wasm32-unknown-unknown/release/backend.wasm",
+      "build": ["bash ./scripts/generate-candid.sh backend"],
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ]
+    },
+    "frontend": {
+      "dependencies": ["backend"],
+      "type": "assets",
+      "source": ["src/frontend/dist/"]
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1,
+  "dfx": "0.25.0"
+}
