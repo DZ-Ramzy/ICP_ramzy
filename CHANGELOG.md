@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add prediction market backend with YES/NO token trading functionality
+- Add market creation, token purchasing, and market closing features
+- Add LLM-powered market analysis using Ollama integration
+- Add React frontend with market list, detail views, and admin panel
+- Add comprehensive test suite for prediction market functionality
 - Add set_count update method to allow setting the counter to a specific value
 - Add frontend development server scripts (`npm run start`)
 - Add LLM canister implementation

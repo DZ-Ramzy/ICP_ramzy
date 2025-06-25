@@ -2,8 +2,8 @@
   "canisters": {
     "w36hm-eqaaa-aaaal-qr76a-cai": {
       "name": "llm",
-      "wasm_hash": "52f23a42ec2dc15343cc01837306ad632a2d82219a4e9a3395cb060faa53489b",
-      "wasm_hash_download": "dffae06470200900780415167242d3eb9c68afd016b9c7db0b06fc825ff89dd2",
+      "wasm_hash": "b4ac8ec1cbd1505e217dd52decb9f52c60d3c1a818c31876508490e59448e1f7",
+      "wasm_hash_download": "9fc6a172b13289428c6975895382c3c923fb641bcd8e8a5168469298c3cff310",
       "init_guide": "",
       "init_arg": null,
       "candid_args": "(opt backend_config, opt config)",

@@ -28,6 +28,7 @@ dependencies = [
  "ic-cdk",
  "ic-cdk-timers",
  "ic-llm",
+ "serde",
 ]
 
 [[package]]

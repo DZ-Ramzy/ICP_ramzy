@@ -9,13 +9,56 @@ type ChatMessage = variant {
   system : record { content : text };
 };
 type FunctionCall = record { name : text; arguments : vec ToolCallArgument };
+type Market = record {
+  id : nat64;
+  status : MarketStatus;
+  result : opt Side;
+  title : text;
+  creator : principal;
+  no_pool : nat64;
+  description : text;
+  yes_pool : nat64;
+};
+type MarketStatus = variant { Open; Closed };
+type MarketSummary = record {
+  no_price : float64;
+  total_volume : nat64;
+  yes_price : float64;
+  market : Market;
+};
+type Position = record {
+  user_principal : principal;
+  market_id : nat64;
+  side : Side;
+  quantity : nat64;
+};
+type PredictionMarketError = variant {
+  MarketNotFound;
+  MarketClosed;
+  InvalidAmount;
+  Unauthorized;
+  InsufficientDeposit;
+};
+type Result = variant { Ok : text; Err : PredictionMarketError };
+type Result_1 = variant { Ok : nat64; Err : PredictionMarketError };
+type Side = variant { No; Yes };
 type ToolCall = record { id : text; function : FunctionCall };
 type ToolCallArgument = record { value : text; name : text };
 service : {
+  analyze_market : (nat64) -> (Result);
+  buy_tokens : (nat64, Side, nat64, nat64) -> (Result);
   chat : (vec ChatMessage) -> (text);
+  close_market : (nat64, Side) -> (Result);
+  get_admin : () -> (opt principal) query;
+  get_all_user_positions : () -> (vec Position) query;
   get_count : () -> (nat64) query;
+  get_market : (nat64) -> (opt MarketSummary) query;
+  get_markets : () -> (vec MarketSummary) query;
+  get_user_positions : (nat64) -> (vec Position) query;
   greet : (text) -> (text) query;
   increment : () -> (nat64);
+  initialize_market : (text, text) -> (Result_1);
   prompt : (text) -> (text);
+  set_admin : (principal) -> (Result);
   set_count : (nat64) -> (nat64);
 }
