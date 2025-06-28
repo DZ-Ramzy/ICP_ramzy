@@ -29,6 +29,7 @@
   --gradient-icp-primary: linear-gradient(135deg, #29abe2 0%, #3b00b9 100%);
   --gradient-icp-secondary: linear-gradient(135deg, #522785 0%, #29abe2 100%);
   --gradient-icp-warm: linear-gradient(135deg, #f15a24 0%, #fbb03b 100%);
+  --gradient-icp-warn: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);
   --gradient-icp-accent: linear-gradient(
     135deg,
     #7c3aed 0%,
@@ -61,6 +62,10 @@
 
 .gradient-icp-warm {
   background: var(--gradient-icp-warm);
+}
+
+.gradient-icp-warn {
+  background: var(--gradient-icp-warn);
 }
 
 .gradient-icp-accent {
@@ -241,12 +246,47 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Ensure full height without overflow */
-html,
-body,
-#root {
+/* Ensure full height without overflow and proper background coverage */
+html {
   height: 100%;
   overflow-x: hidden;
+  background: #0f0f23; /* Fallback solid background */
+}
+
+body {
+  min-height: 100vh;
+  height: auto;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  background: var(--gradient-icp-hero);
+  background-attachment: fixed; /* Keep background fixed during scroll */
+  background-size: 400% 400%;
+  background-repeat: no-repeat;
+  animation: gradientShift 20s ease infinite;
+  /* Prevent overscroll bounce */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+#root {
+  min-height: 100vh;
+  height: auto;
+  position: relative;
+  background: transparent; /* Let body background show through */
+  overflow-x: hidden;
+}
+
+/* Prevent white space during scroll on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fix viewport on mobile */
+@supports (-webkit-appearance: none) {
+  body {
+    background-attachment: scroll; /* Fixed background can cause issues on iOS */
+  }
 }
 
 /* Line clamp utilities */

@@ -45,17 +45,17 @@ export function WalletConnectModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex min-h-screen items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="relative z-10 mx-4 w-full max-w-md">
-        <div className="glass-hover relative overflow-hidden rounded-3xl p-8 shadow-2xl">
-          <div className="gradient-icp-card absolute inset-0 rounded-3xl opacity-40"></div>
+      {/* Modal Container - Perfectly Centered */}
+      <div className="relative z-10 flex w-full max-w-md items-center justify-center">
+        <div className="glass-hover relative w-full scale-100 transform overflow-hidden rounded-3xl border border-white/20 bg-gray-900/95 p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 ease-out">
+          <div className="gradient-icp-card absolute inset-0 rounded-3xl opacity-30"></div>
 
           <div className="relative z-10">
             {/* Header */}

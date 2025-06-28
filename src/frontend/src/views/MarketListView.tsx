@@ -29,6 +29,7 @@ export function MarketListView() {
   const loadMarkets = async () => {
     try {
       setLoading(true);
+      setError(null); // Clear any existing error state
       const marketData = await PredictionMarketService.getMarkets();
       setMarkets(marketData);
     } catch (err) {

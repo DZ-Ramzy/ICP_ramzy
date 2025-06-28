@@ -11,3 +11,8 @@ export { ToastContainer } from "./Toast";
 export type { Toast } from "./Toast";
 export { DepositModal } from "./DepositModal";
 export { AccountManagement } from "./AccountManagement";
+export { AIInsightModal } from "./AIInsightModal";
+export { AIInsightButton } from "./AIInsightButton";
+export { AdminProtectedRoute } from "./AdminProtectedRoute";
+export { SetupAdmin } from "./SetupAdmin";
+export { AIConfigurationPanel } from "./AIConfigurationPanel";

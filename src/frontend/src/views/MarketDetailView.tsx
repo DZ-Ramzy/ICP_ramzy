@@ -3,7 +3,12 @@ import { useParams, Link } from "react-router-dom";
 import { PredictionMarketService } from "../services/predictionMarket";
 import { walletService, type WalletInfo } from "../services/wallet";
 import { accountService, type AccountBalance } from "../services/account";
-import { WalletConnectModal, DepositModal } from "../components";
+import {
+  WalletConnectModal,
+  DepositModal,
+  AIInsightModal,
+  AIInsightButton,
+} from "../components";
 
 interface MarketSummary {
   market: {
@@ -48,6 +53,9 @@ export function MarketDetailView() {
     totalBalance: 0,
     currencies: {},
   });
+
+  // AI Insight state
+  const [showAIInsightModal, setShowAIInsightModal] = useState(false);
 
   // Trading form state
   const [selectedSide, setSelectedSide] = useState<"Yes" | "No">("Yes");
@@ -292,12 +300,25 @@ export function MarketDetailView() {
         <div className="gradient-icp-card absolute inset-0 rounded-2xl opacity-30"></div>
 
         <div className="relative z-10">
-          <h1 className="text-gradient mb-4 text-3xl font-bold">
-            {market.market.title}
-          </h1>
-          <p className="mb-6 text-lg leading-relaxed text-white/80">
-            {market.market.description}
-          </p>
+          {/* Market Title and AI Insights */}
+          <div className="mb-6">
+            <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex-1">
+                <h1 className="max-w-4xl rounded-xl border border-white/10 bg-black/20 p-4 text-3xl leading-tight font-bold tracking-tight text-white drop-shadow-lg backdrop-blur-sm lg:text-4xl">
+                  {market.market.title}
+                </h1>
+              </div>
+              <div className="flex-shrink-0">
+                <AIInsightButton
+                  onClick={() => setShowAIInsightModal(true)}
+                  className="shadow-lg"
+                />
+              </div>
+            </div>
+            <p className="max-w-4xl text-lg leading-relaxed text-white/90 lg:text-xl">
+              {market.market.description}
+            </p>
+          </div>
 
           {/* Prices - more compact layout */}
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -736,6 +757,14 @@ export function MarketDetailView() {
           }}
         />
       )}
+
+      {/* AI Insight Modal */}
+      <AIInsightModal
+        isOpen={showAIInsightModal}
+        onClose={() => setShowAIInsightModal(false)}
+        marketTitle={market.market.title}
+        marketDescription={market.market.description}
+      />
     </div>
   );
 }

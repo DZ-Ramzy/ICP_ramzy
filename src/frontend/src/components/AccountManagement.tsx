@@ -76,7 +76,7 @@ export function AccountManagement({ isOpen, onClose }: AccountManagementProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
         <div className="glass-card mx-4 max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-3xl">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/10 p-6">

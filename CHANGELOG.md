@@ -9,9 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add prediction market backend with YES/NO token trading functionality
-- Add market creation, token purchasing, and market closing features
+- Add comprehensive Automated Market Maker (AMM) smart contract for prediction markets
+- Add YES/NO token trading with constant product formula (x \* y = k) pricing
+- Add dynamic token pricing with automatic price discovery based on supply and demand
+- Add market creation with configurable initial liquidity and 0.3% trading fees
+- Add slippage protection for all buy/sell operations
+- Add reward distribution system with proportional ICP payouts to winning token holders
+- Add market resolution functionality (admin-only) with double-claim protection
+- Add comprehensive unit test suite covering AMM mechanics, reward distribution, and edge cases
+- Add price impact calculations and trading quotes without executing trades
+- Add user position tracking with token balances and claim status
+- Add admin functions for market management and user balance queries
 - Add LLM-powered market analysis using Ollama integration
+- Add AI-based market insights with sentiment analysis and risk assessment
 - Add React frontend with market list, detail views, and admin panel
 - Add comprehensive test suite for prediction market functionality
 - Add set_count update method to allow setting the counter to a specific value

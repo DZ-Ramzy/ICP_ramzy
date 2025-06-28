@@ -162,6 +162,7 @@ export function WalletButton() {
                 {/* Account Management Button */}
                 <button
                   onClick={() => {
+                    console.log("Opening Account Management...");
                     setShowAccountManagement(true);
                     setShowDropdown(false);
                   }}

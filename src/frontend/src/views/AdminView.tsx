@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { PredictionMarketService } from "../services/predictionMarket";
+import { AIConfigurationPanel } from "../components/AIConfigurationPanel";
 import type { Principal } from "@dfinity/principal";
 
 interface MarketSummary {
@@ -31,6 +32,9 @@ export function AdminView() {
   // Admin form
   const [adminInput, setAdminInput] = useState("");
   const [settingAdmin, setSettingAdmin] = useState(false);
+
+  // AI Configuration
+  const [showAIConfig, setShowAIConfig] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -76,13 +80,41 @@ export function AdminView() {
     }
   };
 
-  const handleCloseMarket = async (marketId: number, result: "Yes" | "No") => {
+  /**
+   * Nouvelle fonction pour fermer un marché avec distribution automatique
+   */
+  const handleCloseMarketWithDistribution = async (
+    marketId: number,
+    result: "Yes" | "No",
+  ) => {
     try {
-      await PredictionMarketService.closeMarket(marketId, result);
-      await loadData(); // Reload markets
       setError(null);
+
+      // La distribution se fait automatiquement dans le backend maintenant
+      console.log(`🔒 Closing market ${marketId} with result: ${result}`);
+      const closeResult = await PredictionMarketService.closeMarket(
+        marketId,
+        result,
+      );
+
+      console.log("✅ Market closed with automatic distribution:", closeResult);
+
+      // Afficher un message de succès détaillé
+      alert(`
+🎉 Marché fermé avec succès !
+
+${closeResult}
+
+📊 Les gains ont été automatiquement distribués :
+- Les gagnants ont reçu leurs tokens + bénéfices
+- L'admin a reçu 10% du pool total en commission
+- Tous les transferts ont été effectués automatiquement
+      `);
+
+      await loadData(); // Reload markets
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to close market");
+      console.error("❌ Error closing market:", err);
     }
   };
 
@@ -320,6 +352,137 @@ export function AdminView() {
         </div>
       </div>
 
+      {/* AI Configuration Section */}
+      <div className="glass-hover relative overflow-hidden rounded-3xl p-8">
+        <div className="gradient-icp-card absolute inset-0 rounded-3xl opacity-30"></div>
+
+        <div className="relative z-10">
+          <h2 className="text-gradient mb-6 flex items-center space-x-3 text-2xl font-bold">
+            <div className="gradient-icp-accent flex h-8 w-8 items-center justify-center rounded-lg">
+              <svg
+                className="h-4 w-4 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                />
+              </svg>
+            </div>
+            <span>AI Configuration</span>
+          </h2>
+
+          <p className="mb-6 text-white/80">
+            Configure AI analysis settings and choose between ICP Native AI or
+            enhanced simulation.
+          </p>
+
+          <button
+            onClick={() => setShowAIConfig(true)}
+            className="gradient-icp-primary flex items-center space-x-3 rounded-xl px-6 py-3 font-bold text-white shadow-xl transition-all duration-300 hover:scale-105"
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            <span>Configure AI Settings</span>
+          </button>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="rounded-lg border border-blue-400/20 bg-blue-500/10 p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <svg
+                  className="h-4 w-4 text-blue-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+                <span className="text-sm font-medium text-blue-200">
+                  Enhanced Analysis
+                </span>
+              </div>
+              <p className="text-xs text-blue-200/80">
+                Sentiment analysis & risk assessment
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-purple-400/20 bg-purple-500/10 p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <svg
+                  className="h-4 w-4 text-purple-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="text-sm font-medium text-purple-200">
+                  Historical Data
+                </span>
+              </div>
+              <p className="text-xs text-purple-200/80">
+                Pattern recognition & comparisons
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-green-400/20 bg-green-500/10 p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <svg
+                  className="h-4 w-4 text-green-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="text-sm font-medium text-green-200">
+                  ICP Native
+                </span>
+              </div>
+              <p className="text-xs text-green-200/80">
+                Decentralized AI infrastructure
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Create New Market */}
       <div className="glass-hover relative overflow-hidden rounded-2xl p-6">
         <div className="gradient-icp-card absolute inset-0 rounded-2xl opacity-30"></div>
@@ -491,13 +654,19 @@ export function AdminView() {
                 <MarketManagementCard
                   key={marketSummary.market.id}
                   marketSummary={marketSummary}
-                  onCloseMarket={handleCloseMarket}
+                  onCloseMarket={handleCloseMarketWithDistribution}
                 />
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* AI Configuration Modal */}
+      <AIConfigurationPanel
+        isOpen={showAIConfig}
+        onClose={() => setShowAIConfig(false)}
+      />
     </div>
   );
 }
@@ -512,6 +681,11 @@ function MarketManagementCard({
   const { market, yes_price, no_price, total_volume } = marketSummary;
   const isOpen =
     PredictionMarketService.getStatusDisplay(market.status) === "Open";
+
+  // Debug inspection for closed markets
+  if (!isOpen) {
+    PredictionMarketService.inspectMarket(market);
+  }
 
   return (
     <div className="glass card-hover relative overflow-hidden rounded-xl p-4">
@@ -617,25 +791,44 @@ function MarketManagementCard({
           </div>
         )}
 
-        {!isOpen && market.result && (
+        {!isOpen && (
           <div className="text-center">
-            <span className="inline-flex items-center rounded-full border border-blue-400/30 bg-blue-500/20 px-4 py-2 text-sm font-bold text-blue-300">
-              <svg
-                className="mr-2 h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4"
-                />
-              </svg>
-              Final Result:{" "}
-              {PredictionMarketService.getSideDisplay(market.result)}
-            </span>
+            {market.result ? (
+              <span className="inline-flex items-center rounded-full border border-blue-400/30 bg-blue-500/20 px-4 py-2 text-sm font-bold text-blue-300">
+                <svg
+                  className="mr-2 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4"
+                  />
+                </svg>
+                Final Result:{" "}
+                {PredictionMarketService.getSideDisplay(market.result)}
+              </span>
+            ) : (
+              <span className="inline-flex items-center rounded-full border border-orange-400/30 bg-orange-500/20 px-4 py-2 text-sm font-bold text-orange-300">
+                <svg
+                  className="mr-2 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+                Final Result: Pending
+              </span>
+            )}
           </div>
         )}
       </div>

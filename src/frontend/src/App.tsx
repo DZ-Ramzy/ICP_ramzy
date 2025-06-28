@@ -3,15 +3,21 @@ import { MarketListView } from "./views/MarketListView";
 import { MarketDetailView } from "./views/MarketDetailView";
 import { AdminView } from "./views/AdminView";
 import { WalletButton } from "./components/WalletButton";
+import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
 import { ToastContainer } from "./components/Toast";
 import { useToast } from "./hooks/useToast";
+import { useAdminStatus } from "./hooks/useAdminStatus";
 
 function App() {
   const { toasts, removeToast } = useToast();
+  const { isAdmin, isLoading } = useAdminStatus();
 
   return (
     <Router>
-      <div className="animated-bg flex min-h-screen flex-col">
+      <div className="relative flex min-h-screen flex-col">
+        {/* Fixed animated background */}
+        <div className="animated-bg fixed inset-0 -z-10"></div>
+
         {/* Navigation */}
         <nav className="glass sticky top-0 z-50 border-b border-white/10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -43,28 +49,33 @@ function App() {
                   <span className="relative z-10">Markets</span>
                   <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
                 </Link>
-                <Link
-                  to="/admin"
-                  className="gradient-icp-warm group relative overflow-hidden rounded-lg px-4 py-2 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105"
-                >
-                  <span className="relative z-10 flex items-center space-x-2">
-                    <span>Admin</span>
-                    <svg
-                      className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 7l5 5m0 0l-5 5m5-5H6"
-                      />
-                    </svg>
-                  </span>
-                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full"></div>
-                </Link>
+
+                {/* Admin Link - Only show if user is admin */}
+                {isAdmin && !isLoading && (
+                  <Link
+                    to="/admin"
+                    className="gradient-icp-warm group relative overflow-hidden rounded-lg px-4 py-2 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105"
+                  >
+                    <span className="relative z-10 flex items-center space-x-2">
+                      <span>Admin</span>
+                      <svg
+                        className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
+                        />
+                      </svg>
+                    </span>
+                    <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full"></div>
+                  </Link>
+                )}
+
                 <WalletButton />
               </div>
             </div>
@@ -77,7 +88,14 @@ function App() {
             <Routes>
               <Route path="/" element={<MarketListView />} />
               <Route path="/market/:id" element={<MarketDetailView />} />
-              <Route path="/admin" element={<AdminView />} />
+              <Route
+                path="/admin"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminView />
+                  </AdminProtectedRoute>
+                }
+              />
             </Routes>
           </div>
         </main>
