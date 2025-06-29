@@ -76,36 +76,44 @@ describe("MarketListView", () => {
     // Setup
     const mockMarkets = [
       {
-        id: 1,
         market: {
-          id: 1,
+          id: BigInt(1),
           title: "Will Bitcoin reach $100k by 2025?",
           description: "Prediction about Bitcoin price",
           creator: Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai"),
-          yes_pool: 1000,
-          no_pool: 800,
+          admin: Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai"),
+          yes_reserve: BigInt(1000),
+          no_reserve: BigInt(800),
+          icp_liquidity_pool: BigInt(1800),
           status: { Open: null },
-          result: [] as [] | [any],
+          winning_outcome: [] as [] | [any],
+          creation_time: BigInt(Date.now()),
+          total_fees_collected: BigInt(0),
         },
-        total_volume: 1800,
+        total_volume: BigInt(1800),
         yes_price: 0.556,
         no_price: 0.444,
+        price_impact: 0.05,
       },
       {
-        id: 2,
         market: {
-          id: 2,
+          id: BigInt(2),
           title: "Will AI replace developers by 2030?",
           description: "Prediction about AI development",
           creator: Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai"),
-          yes_pool: 500,
-          no_pool: 1200,
+          admin: Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai"),
+          yes_reserve: BigInt(500),
+          no_reserve: BigInt(1200),
+          icp_liquidity_pool: BigInt(1700),
           status: { Open: null },
-          result: [] as [] | [any],
+          winning_outcome: [] as [] | [any],
+          creation_time: BigInt(Date.now()),
+          total_fees_collected: BigInt(0),
         },
-        total_volume: 1700,
+        total_volume: BigInt(1700),
         yes_price: 0.294,
         no_price: 0.706,
+        price_impact: 0.03,
       },
     ];
 
@@ -195,20 +203,24 @@ describe("MarketListView", () => {
     // Setup
     const mockMarkets = [
       {
-        id: 1,
         market: {
-          id: 1,
+          id: BigInt(1),
           title: "Test Market",
           description: "Test Description",
           creator: Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai"),
-          yes_pool: 1000,
-          no_pool: 800,
+          admin: Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai"),
+          yes_reserve: BigInt(1000),
+          no_reserve: BigInt(800),
+          icp_liquidity_pool: BigInt(1800),
           status: { Open: null },
-          result: [] as [] | [any],
+          winning_outcome: [] as [] | [any],
+          creation_time: BigInt(Date.now()),
+          total_fees_collected: BigInt(0),
         },
-        total_volume: 1800,
+        total_volume: BigInt(1800),
         yes_price: 0.556,
         no_price: 0.444,
+        price_impact: 0.05,
       },
     ];
 
@@ -260,20 +272,24 @@ describe("MarketListView", () => {
     // Setup
     const mockMarkets = [
       {
-        id: 1,
         market: {
-          id: 1,
+          id: BigInt(1),
           title: "Test Market",
           description: "Test Description",
           creator: Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai"),
-          yes_pool: 1000,
-          no_pool: 800,
+          admin: Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai"),
+          yes_reserve: BigInt(1000),
+          no_reserve: BigInt(800),
+          icp_liquidity_pool: BigInt(1800),
           status: { Open: null },
-          result: [] as [] | [any],
+          winning_outcome: [] as [] | [any],
+          creation_time: BigInt(Date.now()),
+          total_fees_collected: BigInt(0),
         },
-        total_volume: 1800,
+        total_volume: BigInt(1800),
         yes_price: 0.556,
         no_price: 0.444,
+        price_impact: 0.05,
       },
     ];
 

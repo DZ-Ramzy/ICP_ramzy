@@ -179,8 +179,9 @@ class WalletService {
   private async connectInternetIdentity(): Promise<WalletInfo> {
     try {
       // In a real implementation, you'd use @dfinity/auth-client
-      // For now, we'll simulate the connection
-      const mockPrincipal = "rdmx6-jaaaa-aaaah-qcaiq-cai";
+      // For now, we'll simulate the connection with a valid principal
+      const mockPrincipal =
+        "hu4mr-xdpm5-tho4x-tyiqd-nl4og-yiavx-ftzje-toyfl-vwavt-fbpbq-7ae";
 
       const walletInfo: WalletInfo = {
         address: mockPrincipal,

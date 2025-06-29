@@ -8,19 +8,19 @@ interface CounterViewProps {
 }
 
 /**
- * CounterView component for handling the counter functionality
+ * CounterView component - DISABLED: Counter functionality is not available in current backend
  */
 export function CounterView({ onError, setLoading }: CounterViewProps) {
-  const [count, setCount] = useState<bigint>(BigInt(0));
+  const [count] = useState<bigint>(BigInt(0));
 
   const fetchCount = async () => {
     try {
       setLoading(true);
-      const res = await backendService.getCount();
-      setCount(res);
+      // This function is not available in the current backend
+      await backendService.getCount();
     } catch (err) {
       console.error(err);
-      onError(String(err));
+      onError("Counter functionality is not available in the current backend");
     } finally {
       setLoading(false);
     }
@@ -29,25 +29,32 @@ export function CounterView({ onError, setLoading }: CounterViewProps) {
   const incrementCounter = async () => {
     try {
       setLoading(true);
-      const res = await backendService.incrementCounter();
-      setCount(res);
+      // This function is not available in the current backend
+      await backendService.incrementCounter();
     } catch (err) {
       console.error(err);
-      onError(String(err));
+      onError("Counter functionality is not available in the current backend");
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch the initial count when component mounts
+  // Don't fetch on mount since the function is not available
   useEffect(() => {
-    fetchCount();
+    // fetchCount(); // Disabled
   }, []);
 
   return (
-    <Card title={`Counter: ${count.toString()}`}>
-      <Button onClick={incrementCounter}>Increment</Button>
-      <Button onClick={fetchCount}>Refresh Count</Button>
+    <Card title={`Counter: ${count.toString()} (DISABLED)`}>
+      <div className="mb-4 rounded border border-yellow-200 bg-yellow-50 p-3 text-yellow-600">
+        ⚠️ Counter functionality is not available in the current backend
+      </div>
+      <Button onClick={incrementCounter} disabled>
+        Increment (Disabled)
+      </Button>
+      <Button onClick={fetchCount} disabled>
+        Refresh Count (Disabled)
+      </Button>
     </Card>
   );
 }

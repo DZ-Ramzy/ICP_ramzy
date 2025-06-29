@@ -1,44 +1,13 @@
 import { backend } from "../../../declarations/backend";
 import { Principal } from "@dfinity/principal";
+import type {
+  AmmMarket,
+  MarketSummary,
+  UserPosition,
+} from "../../../declarations/backend/backend.did";
 
-// Type definitions for our AMM prediction market
-export interface AmmMarket {
-  id: number;
-  title: string;
-  description: string;
-  yes_reserve: number;
-  no_reserve: number;
-  icp_liquidity_pool: number;
-  status: any;
-  winning_outcome?: any;
-  creator: Principal;
-  admin: Principal;
-  total_fees_collected: number;
-  creation_time: number;
-}
-
-export interface MarketSummary {
-  market: AmmMarket;
-  yes_price: number;
-  no_price: number;
-  total_volume: number;
-  price_impact: number;
-}
-
-export interface UserPosition {
-  user: Principal;
-  market_id: number;
-  yes_tokens: number;
-  no_tokens: number;
-  claimed_reward: boolean;
-}
-
-export interface TradeResult {
-  tokens_received: number;
-  tokens_paid: number;
-  fee_paid: number;
-  new_price: number;
-}
+// Re-export types from the generated declarations
+export type { AmmMarket, MarketSummary, UserPosition };
 
 export class PredictionMarketService {
   /**
@@ -59,36 +28,153 @@ export class PredictionMarketService {
   }
 
   /**
-   * Get the current admin principal
+   * Check if current caller is admin - NOT AVAILABLE IN CURRENT BACKEND
    */
-  static async getAdmin(): Promise<Principal | null> {
+  static async isAdmin(): Promise<boolean> {
+    throw new Error("isAdmin is not available in the current backend API");
+  }
+
+  /**
+   * Get all markets with pricing information
+   */
+  static async getMarkets(): Promise<MarketSummary[]> {
     try {
-      const result = await backend.get_admin();
-      return result.length > 0 ? result[0]! : null;
+      const markets = await backend.get_markets();
+      return markets;
     } catch (error) {
-      console.error("Failed to get admin:", error);
+      console.error("Failed to get markets:", error);
       throw error;
     }
   }
 
   /**
-   * Create a new prediction market (Admin only)
+   * Get a specific market by ID
+   */
+  static async getMarket(marketId: number): Promise<MarketSummary | null> {
+    try {
+      const result = await backend.get_market(BigInt(marketId));
+      return result.length > 0 ? result[0]! : null;
+    } catch (error) {
+      console.error("Failed to get market:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user positions for current user
+   */
+  static async getUserPositions(_user: Principal): Promise<UserPosition[]> {
+    try {
+      return await backend.get_all_user_positions();
+    } catch (error) {
+      console.error("Failed to get user positions:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get specific user position for a market (for current user)
+   */
+  static async getUserPosition(
+    _user: Principal,
+    marketId: number,
+  ): Promise<UserPosition | null> {
+    try {
+      const result = await backend.get_user_position(BigInt(marketId));
+      return result.length > 0 ? result[0]! : null;
+    } catch (error) {
+      console.error("Failed to get user position:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user balance by principal
+   */
+  static async getUserBalance(user: Principal): Promise<bigint> {
+    try {
+      return await backend.get_balance_of(user);
+    } catch (error) {
+      console.error("Failed to get user balance:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Deposit ICP to user balance
+   */
+  static async deposit(amount: number): Promise<{ Ok: string } | { Err: any }> {
+    try {
+      return await backend.deposit_icp(BigInt(amount));
+    } catch (error) {
+      console.error("Failed to deposit:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Display status in human-readable format
+   */
+  static getStatusDisplay(status: any): string {
+    if (typeof status === "object" && status !== null) {
+      if ("Open" in status) return "Open";
+      if ("Closed" in status) return "Closed";
+      if ("Resolved" in status) return "Resolved";
+      if ("Frozen" in status) return "Frozen";
+    }
+    return "Unknown";
+  }
+
+  // ============================================================
+  // DISABLED FUNCTIONS - NOT AVAILABLE IN CURRENT BACKEND
+  // ============================================================
+
+  /**
+   * Create a new prediction market
    */
   static async createMarket(
     title: string,
     description: string,
+    initialLiquidity: number = 5000,
   ): Promise<number> {
     try {
-      const result = await backend.initialize_market(title, description);
+      console.log("🏗️ Creating market:", {
+        title,
+        description,
+        initialLiquidity,
+      });
+
+      // First, automatically deposit enough ICP for demo purposes
+      const depositAmount = initialLiquidity + 2000; // Extra buffer for safety
+      console.log("💰 Depositing ICP:", depositAmount);
+
+      const depositResult = await backend.deposit_icp(BigInt(depositAmount));
+      console.log("💰 Deposit result:", depositResult);
+
+      if ("Err" in depositResult) {
+        throw new Error(`Deposit failed: ${Object.keys(depositResult.Err)[0]}`);
+      }
+
+      console.log("🏗️ Creating market in backend...");
+      const result = await backend.create_market(
+        title,
+        description,
+        BigInt(initialLiquidity),
+      );
+
+      console.log("🏗️ Market creation result:", result);
+
       if ("Ok" in result) {
-        return Number(result.Ok);
+        const marketId = Number(result.Ok);
+        console.log("✅ Market created successfully with ID:", marketId);
+        return marketId;
       } else {
         throw new Error(
           `Failed to create market: ${Object.keys(result.Err)[0]}`,
         );
       }
     } catch (error) {
-      console.error("Failed to create market:", error);
+      console.error("❌ Error creating market:", error);
       throw error;
     }
   }
@@ -99,155 +185,231 @@ export class PredictionMarketService {
   static async buyTokens(
     marketId: number,
     side: "Yes" | "No",
-    quantity: number,
-    depositAmount: number,
-  ): Promise<string> {
+    icpAmount: number,
+    minTokensOut: number = 0,
+  ): Promise<any> {
     try {
-      const sideEnum = side === "Yes" ? { Yes: null } : { No: null };
-      const result = await backend.buy_tokens(
-        BigInt(marketId),
-        sideEnum,
-        BigInt(quantity),
-        BigInt(depositAmount),
-      );
+      console.log(`🛒 Buying ${side} tokens for market ${marketId}:`, {
+        icpAmount,
+        minTokensOut,
+      });
+
+      const result =
+        side === "Yes"
+          ? await backend.buy_yes_tokens(
+              BigInt(marketId),
+              BigInt(icpAmount),
+              BigInt(minTokensOut),
+            )
+          : await backend.buy_no_tokens(
+              BigInt(marketId),
+              BigInt(icpAmount),
+              BigInt(minTokensOut),
+            );
 
       if ("Ok" in result) {
+        console.log("✅ Tokens purchased successfully:", result.Ok);
         return result.Ok;
       } else {
         throw new Error(`Failed to buy tokens: ${Object.keys(result.Err)[0]}`);
       }
     } catch (error) {
-      console.error("Failed to buy tokens:", error);
+      console.error("❌ Error buying tokens:", error);
       throw error;
     }
   }
 
   /**
-   * Resolve a market with a result (Admin only)
+   * Resolve a market with a result
    */
   static async closeMarket(
     marketId: number,
     result: "Yes" | "No",
   ): Promise<string> {
     try {
-      const resultEnum = result === "Yes" ? { Yes: null } : { No: null };
-      const response = await backend.resolve_market(
+      console.log(`🔒 Closing market ${marketId} with result: ${result}`);
+
+      const outcome = result === "Yes" ? { Yes: null } : { No: null };
+      const resolveResult = await backend.resolve_market(
         BigInt(marketId),
-        resultEnum,
+        outcome,
       );
 
-      if ("Ok" in response) {
-        return response.Ok;
+      if ("Ok" in resolveResult) {
+        console.log("✅ Market closed successfully:", resolveResult.Ok);
+        return resolveResult.Ok;
       } else {
         throw new Error(
-          `Failed to resolve market: ${Object.keys(response.Err)[0]}`,
+          `Failed to close market: ${Object.keys(resolveResult.Err)[0]}`,
         );
       }
     } catch (error) {
-      console.error("Failed to resolve market:", error);
+      console.error("❌ Error closing market:", error);
       throw error;
     }
   }
 
   /**
-   * Get all markets with pricing information
+   * Sell user tokens
    */
-  static async getMarkets() {
+  static async sellTokens(
+    marketId: number,
+    side: "Yes" | "No",
+    tokenAmount: number,
+    minIcpOut: number = 0,
+  ): Promise<any> {
     try {
-      const markets = await backend.get_markets();
-      return markets.map((market: any) => ({
-        ...market,
-        id: Number(market.market.id),
-        market: {
-          ...market.market,
-          id: Number(market.market.id),
-          yes_pool: Number(market.market.yes_pool),
-          no_pool: Number(market.market.no_pool),
-        },
-        total_volume: Number(market.total_volume),
-      }));
-    } catch (error) {
-      console.error("Failed to get markets:", error);
-      throw error;
-    }
-  }
+      console.log(`💰 Selling ${side} tokens for market ${marketId}:`, {
+        tokenAmount,
+        minIcpOut,
+      });
 
-  /**
-   * Get a specific market by ID
-   */
-  static async getMarket(marketId: number) {
-    try {
-      const result = await backend.get_market(BigInt(marketId));
-      if (result.length > 0) {
-        const marketSummary = result[0]!; // TypeScript assertion since we checked length
-        return {
-          market: {
-            id: Number(marketSummary.market.id),
-            title: marketSummary.market.title,
-            description: marketSummary.market.description,
-            status: marketSummary.market.status,
-            result: marketSummary.market.result,
-            yes_pool: Number(marketSummary.market.yes_pool),
-            no_pool: Number(marketSummary.market.no_pool),
-          },
-          yes_price: marketSummary.yes_price,
-          no_price: marketSummary.no_price,
-          total_volume: Number(marketSummary.total_volume),
-        };
+      const result =
+        side === "Yes"
+          ? await backend.sell_yes_tokens(
+              BigInt(marketId),
+              BigInt(tokenAmount),
+              BigInt(minIcpOut),
+            )
+          : await backend.sell_no_tokens(
+              BigInt(marketId),
+              BigInt(tokenAmount),
+              BigInt(minIcpOut),
+            );
+
+      if ("Ok" in result) {
+        console.log("✅ Tokens sold successfully:", result.Ok);
+        return result.Ok;
+      } else {
+        throw new Error(`Failed to sell tokens: ${Object.keys(result.Err)[0]}`);
       }
-      return null;
     } catch (error) {
-      console.error("Failed to get market:", error);
+      console.error("❌ Error selling tokens:", error);
       throw error;
     }
   }
 
   /**
-   * Get user position for a specific market
+   * Calculate buy quote for tokens
    */
-  static async getUserPosition(marketId: number) {
+  static async getBuyQuote(
+    marketId: number,
+    icpAmount: number,
+    tokenType: "Yes" | "No",
+  ): Promise<any> {
     try {
-      const position = await backend.get_user_position(BigInt(marketId));
-      if (position.length > 0) {
-        const pos = position[0]!;
-        return {
-          ...pos,
-          market_id: Number(pos.market_id),
-          yes_tokens: Number(pos.yes_tokens),
-          no_tokens: Number(pos.no_tokens),
-        };
+      const result = await backend.get_buy_quote(
+        BigInt(marketId),
+        BigInt(icpAmount),
+        tokenType === "Yes" ? { Yes: null } : { No: null },
+      );
+
+      if ("Ok" in result) {
+        return result.Ok;
+      } else {
+        throw new Error(
+          `Failed to get buy quote: ${Object.keys(result.Err)[0]}`,
+        );
       }
-      return null;
     } catch (error) {
-      console.error("Failed to get user position:", error);
+      console.error("Failed to get buy quote:", error);
       throw error;
     }
   }
 
   /**
-   * Get all user positions
+   * Calculate sell quote for tokens
    */
-  static async getAllUserPositions() {
+  static async getSellQuote(
+    marketId: number,
+    tokenAmount: number,
+    tokenType: "Yes" | "No",
+  ): Promise<any> {
     try {
-      const positions = await backend.get_all_user_positions();
-      return positions.map((position: any) => ({
-        ...position,
-        market_id: Number(position.market_id),
-        yes_tokens: Number(position.yes_tokens),
-        no_tokens: Number(position.no_tokens),
-      }));
+      const result = await backend.get_sell_quote(
+        BigInt(marketId),
+        BigInt(tokenAmount),
+        tokenType === "Yes" ? { Yes: null } : { No: null },
+      );
+
+      if ("Ok" in result) {
+        return result.Ok;
+      } else {
+        throw new Error(
+          `Failed to get sell quote: ${Object.keys(result.Err)[0]}`,
+        );
+      }
     } catch (error) {
-      console.error("Failed to get all user positions:", error);
+      console.error("Failed to get sell quote:", error);
       throw error;
     }
   }
 
   /**
-   * Get LLM analysis for a market
+   * Claim reward for winning tokens (NOT AVAILABLE)
+   */
+  static async claimReward(_marketId: number): Promise<any> {
+    throw new Error(
+      "claimReward function is not available in the current backend",
+    );
+  }
+
+  /**
+   * Get user's claims history (NOT AVAILABLE)
+   */
+  static async getUserClaims(): Promise<any[]> {
+    throw new Error(
+      "getUserClaims function is not available in the current backend",
+    );
+  }
+
+  /**
+   * Helper function to format prices as percentages
+   */
+  static formatPrice(price: number): string {
+    return `${(price * 100).toFixed(1)}%`;
+  }
+
+  /**
+   * Helper function to determine side display
+   */
+  static getSideDisplay(result: any): string {
+    if (!result) return "Unknown";
+
+    // Handle optional array format from Candid: [] | [TokenType]
+    if (Array.isArray(result)) {
+      if (result.length === 0) return "Unknown";
+      const side = result[0];
+      if ("Yes" in side) return "YES";
+      if ("No" in side) return "NO";
+    }
+
+    // Handle direct object format: { Yes: null } or { No: null }
+    if (typeof result === "object" && result !== null) {
+      if ("Yes" in result) return "YES";
+      if ("No" in result) return "NO";
+    }
+
+    return "Unknown";
+  }
+
+  /**
+   * Get admin principal (NOT AVAILABLE - use adminAuthService.getAdminPrincipal instead)
+   */
+  static async getAdmin(): Promise<Principal | null> {
+    throw new Error(
+      "getAdmin function is not available in the current backend - use adminAuthService.getAdminPrincipal instead",
+    );
+  }
+
+  /**
+   * Analyze market with AI (NOW AVAILABLE)
    */
   static async analyzeMarket(marketId: number): Promise<string> {
     try {
+      console.log("🤖 Analyzing market:", marketId);
       const result = await backend.analyze_market(BigInt(marketId));
+
       if ("Ok" in result) {
         return result.Ok;
       } else {
@@ -262,131 +424,14 @@ export class PredictionMarketService {
   }
 
   /**
-   * Deposit funds to user balance (for testing purposes)
-   */
-  static async depositFunds(amount: number): Promise<string> {
-    try {
-      const response = await backend.deposit_funds(BigInt(amount));
-
-      if ("Ok" in response) {
-        return response.Ok;
-      } else {
-        throw new Error(
-          `Failed to deposit funds: ${Object.keys(response.Err)[0]}`,
-        );
-      }
-    } catch (error) {
-      console.error("Failed to deposit funds:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get user balance
-   */
-  static async getUserBalance(userPrincipal: string): Promise<number> {
-    try {
-      const principal = Principal.fromText(userPrincipal);
-      const balance = await backend.get_user_balance(principal);
-      return Number(balance);
-    } catch (error) {
-      console.error("Failed to get user balance:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Helper function to format prices as percentages
-   */
-  static formatPrice(price: number): string {
-    return `${(price * 100).toFixed(1)}%`;
-  }
-
-  /**
-   * Helper function to determine market status display
-   */
-  static getStatusDisplay(status: any): string {
-    if ("Open" in status) return "Open";
-    if ("Closed" in status) return "Closed";
-    return "Unknown";
-  }
-
-  /**
-   * Helper function to determine side display
-   */
-  static getSideDisplay(result: any): string {
-    console.log("getSideDisplay called with:", result); // Debug log
-
-    if (!result) {
-      console.log("Result is null/undefined");
-      return "Unknown";
-    }
-
-    // Handle array format from Candid: [] | [Side]
-    if (Array.isArray(result)) {
-      console.log("Result is array:", result);
-      if (result.length === 0) {
-        console.log("Result array is empty");
-        return "Unknown";
-      }
-      // Get the first element which should be the Side
-      const side = result[0];
-      console.log("Side from array:", side);
-
-      if ("Yes" in side) {
-        console.log("Found Yes in side");
-        return "YES";
-      }
-      if ("No" in side) {
-        console.log("Found No in side");
-        return "NO";
-      }
-    }
-
-    // Handle direct object format: { Yes: null } or { No: null }
-    if (typeof result === "object" && result !== null) {
-      if ("Yes" in result) {
-        console.log("Found Yes in result object");
-        return "YES";
-      }
-      if ("No" in result) {
-        console.log("Found No in result object");
-        return "NO";
-      }
-    }
-
-    // Additional fallback for direct string values
-    if (typeof result === "string") {
-      console.log("Result is string:", result);
-      if (result.toLowerCase() === "yes") return "YES";
-      if (result.toLowerCase() === "no") return "NO";
-    }
-
-    console.log("Returning Unknown for result:", result);
-    return "Unknown";
-  }
-
-  /**
-   * Debug helper to inspect market data
+   * Inspect market (DEBUG FUNCTION - NOT AVAILABLE)
    */
   static inspectMarket(market: any): void {
-    console.log("=== Market Inspection ===");
-    console.log("Market ID:", market.id);
-    console.log("Market Status:", market.status);
-    console.log("Market Result:", market.result);
-    console.log("Market Result Type:", typeof market.result);
-    console.log("Market Result Is Array:", Array.isArray(market.result));
-    if (Array.isArray(market.result)) {
-      console.log("Market Result Array Length:", market.result.length);
-      if (market.result.length > 0) {
-        console.log("Market Result First Element:", market.result[0]);
-      }
-    }
-    console.log(
-      "Market Result Structure:",
-      JSON.stringify(market.result, null, 2),
-    );
-    console.log("getSideDisplay result:", this.getSideDisplay(market.result));
-    console.log("========================");
+    console.log("=== Market Inspection (DISABLED) ===");
+    console.log("Market:", market);
+    console.log("Market inspection is disabled in the current backend");
   }
 }
+
+// Default export for compatibility
+export default PredictionMarketService;

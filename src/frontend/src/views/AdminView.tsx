@@ -1,28 +1,18 @@
 import { useState, useEffect } from "react";
 import { PredictionMarketService } from "../services/predictionMarket";
+import { adminAuthService } from "../services/adminAuth";
+import { walletService } from "../services/wallet";
 import { AIConfigurationPanel } from "../components/AIConfigurationPanel";
 import type { Principal } from "@dfinity/principal";
-
-interface MarketSummary {
-  market: {
-    id: number;
-    title: string;
-    description: string;
-    status: any;
-    result?: any;
-    yes_pool: number;
-    no_pool: number;
-  };
-  yes_price: number;
-  no_price: number;
-  total_volume: number;
-}
+import type { MarketSummary } from "../../../declarations/backend/backend.did";
 
 export function AdminView() {
   const [markets, setMarkets] = useState<MarketSummary[]>([]);
   const [admin, setAdmin] = useState<Principal | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [wallet, setWallet] = useState(walletService.getWallet());
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Form states
   const [newMarketTitle, setNewMarketTitle] = useState("");
@@ -37,15 +27,33 @@ export function AdminView() {
   const [showAIConfig, setShowAIConfig] = useState(false);
 
   useEffect(() => {
-    loadData();
+    const unsubscribe = walletService.subscribe(setWallet);
+    return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    loadData();
+    checkAdminStatus();
+  }, [wallet]);
+
+  const checkAdminStatus = async () => {
+    try {
+      if (wallet && wallet.isConnected) {
+        const adminStatus = await adminAuthService.isCurrentUserAdmin();
+        setIsAdmin(adminStatus);
+      }
+    } catch (error) {
+      console.error("Failed to check admin status:", error);
+      setIsAdmin(false);
+    }
+  };
 
   const loadData = async () => {
     try {
       setLoading(true);
       const [marketData, adminData] = await Promise.all([
         PredictionMarketService.getMarkets(),
-        PredictionMarketService.getAdmin(),
+        adminAuthService.getAdminPrincipal(),
       ]);
       setMarkets(marketData);
       setAdmin(adminData);
@@ -84,7 +92,7 @@ export function AdminView() {
    * Nouvelle fonction pour fermer un marché avec distribution automatique
    */
   const handleCloseMarketWithDistribution = async (
-    marketId: number,
+    marketId: bigint,
     result: "Yes" | "No",
   ) => {
     try {
@@ -93,7 +101,7 @@ export function AdminView() {
       // La distribution se fait automatiquement dans le backend maintenant
       console.log(`🔒 Closing market ${marketId} with result: ${result}`);
       const closeResult = await PredictionMarketService.closeMarket(
-        marketId,
+        Number(marketId),
         result,
       );
 
@@ -147,6 +155,49 @@ ${closeResult}
     );
   }
 
+  // Check if wallet is connected
+  if (!wallet || !wallet.isConnected) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="glass-hover relative overflow-hidden rounded-3xl p-12 text-center">
+          <div className="gradient-icp-card absolute inset-0 rounded-3xl opacity-30"></div>
+          <div className="relative z-10">
+            <div className="mb-6">
+              <div className="gradient-icp-warm mx-auto flex h-16 w-16 items-center justify-center rounded-full">
+                <svg
+                  className="h-8 w-8 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <h2 className="mb-4 text-2xl font-bold text-white">
+              Connect Your Wallet
+            </h2>
+            <p className="mb-6 text-white/70">
+              Please connect your wallet to create and manage prediction
+              markets.
+            </p>
+            <button
+              onClick={() => (window.location.href = "/")}
+              className="gradient-icp-primary rounded-xl px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105"
+            >
+              Go Back to Markets
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Hero Section - more compact */}
@@ -154,7 +205,7 @@ ${closeResult}
         <div className="gradient-icp-accent absolute inset-0 rounded-full opacity-10 blur-3xl"></div>
         <div className="relative z-10">
           <h1 className="text-gradient mb-3 flex items-center justify-center space-x-4 text-3xl font-bold">
-            <div className="gradient-icp-warm pulse-glow flex h-10 w-10 items-center justify-center rounded-2xl">
+            <div className="gradient-icp-primary pulse-glow flex h-10 w-10 items-center justify-center rounded-2xl">
               <svg
                 className="h-5 w-5 text-white"
                 fill="none"
@@ -165,15 +216,20 @@ ${closeResult}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  d="M12 4v16m8-8H4"
                 />
               </svg>
             </div>
-            <span>Admin Panel</span>
+            <span>Create Prediction Market</span>
           </h1>
           <p className="text-base text-white/80">
-            Manage prediction markets and system administration
+            Anyone can create prediction markets on any topic!
           </p>
+          <div className="mt-2 rounded-lg bg-blue-500/20 px-3 py-1">
+            <p className="text-sm text-blue-300">
+              🚀 Decentralized markets - You control your creations
+            </p>
+          </div>
         </div>
       </div>
 
@@ -667,6 +723,46 @@ ${closeResult}
         isOpen={showAIConfig}
         onClose={() => setShowAIConfig(false)}
       />
+
+      {/* Admin-only section */}
+      {isAdmin && (
+        <div className="glass-hover relative overflow-hidden rounded-2xl p-6">
+          <div className="gradient-icp-warm absolute inset-0 rounded-2xl opacity-20"></div>
+          <div className="relative z-10">
+            <h2 className="text-gradient mb-4 flex items-center space-x-3 text-xl font-bold">
+              <div className="gradient-icp-warm flex h-7 w-7 items-center justify-center rounded-lg">
+                <svg
+                  className="h-4 w-4 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </div>
+              <span>Global Admin Controls</span>
+            </h2>
+            <p className="mb-4 text-white/70">
+              You have global admin privileges and can manage all markets in the
+              system.
+            </p>
+            <div className="text-sm text-white/60">
+              Current admin: {admin?.toString() || "None"}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -676,11 +772,17 @@ function MarketManagementCard({
   onCloseMarket,
 }: {
   marketSummary: MarketSummary;
-  onCloseMarket: (marketId: number, result: "Yes" | "No") => void;
+  onCloseMarket: (marketId: bigint, result: "Yes" | "No") => void;
 }) {
   const { market, yes_price, no_price, total_volume } = marketSummary;
-  const isOpen =
-    PredictionMarketService.getStatusDisplay(market.status) === "Open";
+  const statusDisplay = PredictionMarketService.getStatusDisplay(market.status);
+  const isOpen = statusDisplay === "Open";
+
+  // Debug logs
+  console.log("Market:", market.title);
+  console.log("Status:", market.status);
+  console.log("Status Display:", statusDisplay);
+  console.log("Is Open:", isOpen);
 
   // Debug inspection for closed markets
   if (!isOpen) {
@@ -748,6 +850,40 @@ function MarketManagementCard({
           </div>
         </div>
 
+        {/* AI Analysis Button */}
+        <div className="mb-4">
+          <button
+            onClick={async () => {
+              try {
+                const analysis = await PredictionMarketService.analyzeMarket(
+                  Number(market.id),
+                );
+                alert(analysis);
+              } catch (error) {
+                alert(
+                  `Error: ${error instanceof Error ? error.message : "Failed to analyze"}`,
+                );
+              }
+            }}
+            className="flex w-full items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-3 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:scale-105"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+              />
+            </svg>
+            <span>🤖 AI Market Analysis</span>
+          </button>
+        </div>
+
         {isOpen && (
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -793,7 +929,7 @@ function MarketManagementCard({
 
         {!isOpen && (
           <div className="text-center">
-            {market.result ? (
+            {market.winning_outcome.length > 0 ? (
               <span className="inline-flex items-center rounded-full border border-blue-400/30 bg-blue-500/20 px-4 py-2 text-sm font-bold text-blue-300">
                 <svg
                   className="mr-2 h-4 w-4"
@@ -809,7 +945,9 @@ function MarketManagementCard({
                   />
                 </svg>
                 Final Result:{" "}
-                {PredictionMarketService.getSideDisplay(market.result)}
+                {market.winning_outcome[0] && "Yes" in market.winning_outcome[0]
+                  ? "YES"
+                  : "NO"}
               </span>
             ) : (
               <span className="inline-flex items-center rounded-full border border-orange-400/30 bg-orange-500/20 px-4 py-2 text-sm font-bold text-orange-300">

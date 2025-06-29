@@ -8,13 +8,8 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib"]
 
-[[bin]]
-name = "amm_tests"
-path = "src/amm_tests.rs"
-
 [dependencies]
 candid = "0.10"
 ic-cdk = "0.17"
-ic-cdk-timers = "0.11" # Feel free to remove this dependency if you don't need timers
 ic-llm = "1.0.0"
 serde = { version = "1.0", features = ["derive"] }

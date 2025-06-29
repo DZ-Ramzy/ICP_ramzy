@@ -8,11 +8,11 @@ interface LlmPromptViewProps {
 }
 
 /**
- * LlmPromptView component for handling interactions with the LLM
+ * LlmPromptView component - DISABLED: LLM functionality is not available in current backend
  */
 export function LlmPromptView({ onError, setLoading }: LlmPromptViewProps) {
   const [prompt, setPrompt] = useState<string>("");
-  const [llmResponse, setLlmResponse] = useState<string>("");
+  const [llmResponse] = useState<string>("");
   const [llmLoading, setLlmLoading] = useState(false);
 
   const handleChangePrompt = (
@@ -29,24 +29,28 @@ export function LlmPromptView({ onError, setLoading }: LlmPromptViewProps) {
 
     try {
       setLlmLoading(true);
-      setLoading(true); // Use the setLoading prop to indicate loading state at App level
-      const res = await backendService.sendLlmPrompt(prompt);
-      setLlmResponse(res);
+      setLoading(true);
+      // This function is not available in the current backend
+      await backendService.sendLlmPrompt(prompt);
     } catch (err) {
       console.error(err);
-      onError(String(err));
+      onError("LLM functionality is not available in the current backend");
     } finally {
       setLlmLoading(false);
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
 
   return (
-    <Card title="LLM Prompt">
+    <Card title="LLM Prompt (DISABLED)">
+      <div className="mb-4 rounded border border-yellow-200 bg-yellow-50 p-3 text-yellow-600">
+        ⚠️ LLM functionality is not available in the current backend
+      </div>
       <TextArea
         value={prompt}
         onChange={handleChangePrompt}
-        placeholder="Ask the LLM something..."
+        placeholder="LLM functionality is disabled..."
+        disabled
       />
       <Button onClick={sendPrompt} disabled={llmLoading}>
         {llmLoading ? "Thinking..." : "Send Prompt"}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Principal } from "@dfinity/principal";
-import { PredictionMarketService } from "../services/predictionMarket";
+import { adminAuthService } from "../services/adminAuth";
 import { walletService } from "../services/wallet";
 
 interface SetupAdminProps {
@@ -24,15 +24,17 @@ export function SetupAdmin({ onAdminSet }: SetupAdminProps) {
       setLoading(true);
       setError(null);
 
-      // For development, use a valid test principal
-      // In production, this should be properly handled with ICP wallet integration
-      const adminPrincipal = Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai");
-      await PredictionMarketService.setAdmin(adminPrincipal);
+      // Use a fixed principal for demo mode
+      const adminPrincipal = Principal.fromText(
+        "hu4mr-xdpm5-tho4x-tyiqd-nl4og-yiavx-ftzje-toyfl-vwavt-fbpbq-7ae",
+      );
+
+      await adminAuthService.setAdmin(adminPrincipal);
 
       setSuccess(true);
       setTimeout(() => {
         onAdminSet();
-      }, 2000);
+      }, 500); // Réduit de 2000ms à 500ms pour une redirection plus rapide
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to set admin");
     } finally {
@@ -64,13 +66,13 @@ export function SetupAdmin({ onAdminSet }: SetupAdminProps) {
               </div>
             </div>
             <h2 className="mb-4 text-2xl font-bold text-white">
-              Admin Set Successfully!
+              🎉 Demo Admin Access Granted!
             </h2>
             <p className="mb-2 text-white/70">
-              You are now the admin of this prediction market.
+              Perfect! You now have full admin access for your presentation.
             </p>
             <p className="text-sm text-white/50">
-              Redirecting to admin panel...
+              Redirecting to admin panel... Get ready to create markets! 🚀
             </p>
           </div>
         </div>
@@ -108,12 +110,16 @@ export function SetupAdmin({ onAdminSet }: SetupAdminProps) {
           </div>
 
           <h2 className="mb-4 text-2xl font-bold text-white">
-            Setup Admin Access
+            🎬 Demo Mode - Admin Setup
           </h2>
 
           <p className="mb-6 text-white/70">
-            No admin is currently set for this prediction market. Set yourself
-            as the admin to access the management interface.
+            <strong>Hackathon Demo:</strong> Click the button below to become
+            admin instantly and access all features!
+            <br />
+            <small className="text-white/50">
+              Perfect for presentations and demos
+            </small>
           </p>
 
           {wallet && wallet.isConnected ? (
@@ -123,7 +129,7 @@ export function SetupAdmin({ onAdminSet }: SetupAdminProps) {
                   Admin Principal ID (Development):
                 </p>
                 <p className="font-mono text-xs break-all text-white/60">
-                  rdmx6-jaaaa-aaaaa-aaadq-cai
+                  hu4mr-xdpm5-tho4x-tyiqd-nl4og-yiavx-ftzje-toyfl-vwavt-fbpbq-7ae
                 </p>
                 <p className="mt-2 text-xs text-white/50">
                   Connected Wallet: {wallet.address}
@@ -147,7 +153,7 @@ export function SetupAdmin({ onAdminSet }: SetupAdminProps) {
                     <span>Setting Admin...</span>
                   </div>
                 ) : (
-                  "Set Me as Admin"
+                  "🚀 Become Admin (Demo Mode)"
                 )}
               </button>
             </div>

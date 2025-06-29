@@ -6,18 +6,9 @@
     },
     "backend": {
       "dependencies": ["llm"],
-      "candid": "src/backend/backend.did",
       "package": "backend",
-      "type": "custom",
-      "shrink": true,
-      "gzip": true,
-      "wasm": "target/wasm32-unknown-unknown/release/backend.wasm",
-      "build": ["bash ./scripts/generate-candid.sh backend"],
-      "metadata": [
-        {
-          "name": "candid:service"
-        }
-      ]
+      "type": "rust",
+      "candid": "src/backend/backend.did"
     },
     "frontend": {
       "dependencies": ["backend"],

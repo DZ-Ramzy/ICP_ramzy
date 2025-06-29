@@ -25,22 +25,16 @@ export function AdminProtectedRoute({ children }: AdminProtectedRouteProps) {
   const checkAdminStatus = async () => {
     setIsLoading(true);
     try {
-      // First check if any admin is set
-      const adminPrincipal = await adminAuthService.getAdminPrincipal();
-      if (!adminPrincipal) {
-        setNoAdminSet(true);
-        setIsAdmin(false);
-        return;
-      }
-
-      // If admin is set, check if current user is admin
+      // Always check if current user is admin (skip admin principal check)
       const adminStatus = await adminAuthService.isCurrentUserAdmin();
       setIsAdmin(adminStatus);
-      setNoAdminSet(false);
+
+      // Always show setup button if not admin
+      setNoAdminSet(!adminStatus);
     } catch (error) {
       console.error("Failed to check admin status:", error);
       setIsAdmin(false);
-      setNoAdminSet(false);
+      setNoAdminSet(true); // Show setup button on error
     } finally {
       setIsLoading(false);
     }

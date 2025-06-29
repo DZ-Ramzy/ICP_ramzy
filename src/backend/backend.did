@@ -1,0 +1,89 @@
+type AmmMarket = record {
+  id : nat64;
+  creation_time : nat64;
+  status : MarketStatus;
+  title : text;
+  creator : principal;
+  admin : principal;
+  yes_reserve : nat64;
+  icp_liquidity_pool : nat64;
+  description : text;
+  total_fees_collected : nat64;
+  no_reserve : nat64;
+  winning_outcome : opt TokenType;
+};
+type MarketStatus = variant { Open; Resolved; Frozen };
+type MarketSummary = record {
+  no_price : float64;
+  price_impact : float64;
+  total_volume : nat64;
+  yes_price : float64;
+  market : AmmMarket;
+};
+type PredictionMarketError = variant {
+  MarketNotFound;
+  MarketClosed;
+  NoWinningTokens;
+  InvalidAmount;
+  AlreadyClaimed;
+  MarketResolved;
+  Unauthorized;
+  InsufficientDeposit;
+  InsufficientLiquidity;
+  SlippageExceeded;
+};
+type Result = variant { Ok : text; Err : PredictionMarketError };
+type Result_1 = variant { Ok : TradeResult; Err : PredictionMarketError };
+type Result_2 = variant { Ok : RewardClaim; Err : PredictionMarketError };
+type Result_3 = variant { Ok : nat64; Err : PredictionMarketError };
+type Result_4 = variant { Ok : float64; Err : PredictionMarketError };
+type RewardClaim = record {
+  market_id : nat64;
+  winning_tokens : nat64;
+  user : principal;
+  reward_amount : nat64;
+  claim_time : nat64;
+};
+type TokenType = variant { No; Yes };
+type TradeResult = record {
+  new_price : float64;
+  tokens_paid : nat64;
+  fee_paid : nat64;
+  tokens_received : nat64;
+};
+type UserPosition = record {
+  market_id : nat64;
+  user : principal;
+  claimed_reward : bool;
+  no_tokens : nat64;
+  yes_tokens : nat64;
+};
+service : () -> {
+  analyze_market : (nat64) -> (Result);
+  buy_no_tokens : (nat64, nat64, nat64) -> (Result_1);
+  buy_yes_tokens : (nat64, nat64, nat64) -> (Result_1);
+  claim_reward : (nat64) -> (Result_2);
+  create_market : (text, text, nat64) -> (Result_3);
+  deposit_icp : (nat64) -> (Result);
+  get_admin : () -> (opt principal) query;
+  get_all_user_positions : () -> (vec UserPosition) query;
+  get_balance_of : (principal) -> (nat64) query;
+  get_buy_quote : (nat64, nat64, TokenType) -> (Result_1) query;
+  get_count : () -> (nat64) query;
+  get_market : (nat64) -> (opt MarketSummary) query;
+  get_markets : () -> (vec MarketSummary) query;
+  get_sell_quote : (nat64, nat64, TokenType) -> (Result_1) query;
+  get_token_price : (nat64, TokenType) -> (Result_4) query;
+  get_user_balance : () -> (nat64) query;
+  get_user_claims : () -> (vec RewardClaim) query;
+  get_user_position : (nat64) -> (opt UserPosition) query;
+  greet : (text) -> (text) query;
+  increment : () -> (nat64);
+  is_admin : () -> (bool) query;
+  reset_admin : () -> (text);
+  resolve_market : (nat64, TokenType) -> (Result);
+  sell_no_tokens : (nat64, nat64, nat64) -> (Result_1);
+  sell_yes_tokens : (nat64, nat64, nat64) -> (Result_1);
+  set_admin : (principal) -> (Result);
+  set_count : (nat64) -> (nat64);
+}

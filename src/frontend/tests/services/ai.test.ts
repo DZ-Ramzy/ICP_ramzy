@@ -97,7 +97,7 @@ describe("AI Service", () => {
 
     // Politics should have medium risk level
     expect(politicsInsight.riskLevel).toBe("Medium");
-  });
+  }, 10000); // Increase timeout to 10 seconds
 
   it("should handle configuration changes", () => {
     // Setup

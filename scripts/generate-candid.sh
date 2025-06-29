@@ -29,17 +29,18 @@ generate_candid_for_canister() {
 
 # Check if a specific canister was requested
 if [ "$1" != "" ]; then
-  # Verify the canister exists in dfx.json
-  if jq -e ".canisters.\"$1\"" dfx.json > /dev/null 2>&1; then
+  # Verify the canister exists in dfx.json and is a Rust canister
+  canister_type=$(jq -r ".canisters.\"$1\".type // empty" dfx.json)
+  if [ "$canister_type" = "rust" ]; then
     generate_candid_for_canister "$1"
   else
-    echo "Error: Canister '$1' not found in dfx.json"
+    echo "Error: Canister '$1' is not a Rust canister (type: $canister_type)"
     exit 1
   fi
 else
-  # No canister specified, generate for all canisters
-  # Get all canister names from dfx.json
-  canister_names=$(jq -r '.canisters | keys[]' dfx.json)
+  # No canister specified, generate for all Rust canisters only
+  # Get all Rust canister names from dfx.json
+  canister_names=$(jq -r '.canisters | to_entries[] | select(.value.type == "rust") | .key' dfx.json)
   
   for canister in $canister_names; do
     generate_candid_for_canister "$canister"

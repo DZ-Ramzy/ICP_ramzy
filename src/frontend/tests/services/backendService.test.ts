@@ -5,10 +5,13 @@ import { backend } from "../../../declarations/backend";
 // Mock the backend canister
 vi.mock("../../../declarations/backend", () => ({
   backend: {
-    greet: vi.fn().mockResolvedValue("Hello, Test User!"),
-    get_count: vi.fn().mockResolvedValue(BigInt(42)),
-    increment: vi.fn().mockResolvedValue(BigInt(43)),
-    prompt: vi.fn().mockResolvedValue("This is a mock LLM response"),
+    greet: vi
+      .fn()
+      .mockImplementation((name: string) => Promise.resolve(`Hello, ${name}!`)),
+    is_admin: vi.fn().mockResolvedValue(false),
+    get_markets: vi.fn().mockResolvedValue([]),
+    get_balance: vi.fn().mockResolvedValue(BigInt(0)),
+    set_message: vi.fn().mockResolvedValue("Message set"),
   },
 }));
 
@@ -29,36 +32,32 @@ describe("backendService", () => {
     });
   });
 
-  describe("getCount", () => {
-    it("should call backend.get_count", async () => {
+  describe("greet", () => {
+    it("should call backend.greet", async () => {
       // Execute
-      const result = await backendService.getCount();
+      const result = await backendService.greet("test");
 
       // Assert
-      expect(backend.get_count).toHaveBeenCalled();
-      expect(result).toBe(BigInt(42));
+      expect(backend.greet).toHaveBeenCalledWith("test");
+      expect(result).toBe("Hello, test!");
     });
   });
 
-  describe("incrementCounter", () => {
-    it("should call backend.increment", async () => {
-      // Execute
-      const result = await backendService.incrementCounter();
-
-      // Assert
-      expect(backend.increment).toHaveBeenCalled();
-      expect(result).toBe(BigInt(43));
+  describe("isAdmin", () => {
+    it("should throw an error for disabled isAdmin functionality", async () => {
+      // Execute & Assert
+      await expect(backendService.isAdmin()).rejects.toThrow(
+        "isAdmin is not available in the current backend API",
+      );
     });
   });
 
   describe("sendLlmPrompt", () => {
-    it("should call backend.prompt with the provided prompt", async () => {
-      // Execute
-      const result = await backendService.sendLlmPrompt("Test prompt");
-
-      // Assert
-      expect(backend.prompt).toHaveBeenCalledWith("Test prompt");
-      expect(result).toBe("This is a mock LLM response");
+    it("should throw an error for disabled LLM functionality", async () => {
+      // Execute & Assert
+      await expect(backendService.sendLlmPrompt("Test prompt")).rejects.toThrow(
+        "sendLlmPrompt function is not available in the current backend",
+      );
     });
   });
 });

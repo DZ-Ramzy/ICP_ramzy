@@ -1,36 +1,26 @@
 import { Principal } from "@dfinity/principal";
 import { walletService } from "./wallet";
-import { PredictionMarketService } from "./predictionMarket";
+import { backendService } from "./backendService";
 
 export interface AdminAuthService {
   isCurrentUserAdmin(): Promise<boolean>;
   getCurrentUserPrincipal(): Promise<Principal | null>;
-  getAdminPrincipal(): Promise<Principal | null>;
+  setAdmin(principal: Principal): Promise<string>;
+  getAdminPrincipal(): Promise<Principal | null>; // Added this method
 }
 
 class AdminAuthServiceImpl implements AdminAuthService {
-  private adminPrincipal: Principal | null = null;
-  private lastCheck: number = 0;
-  private readonly CACHE_DURATION = 30000; // 30 seconds cache
-
   /**
-   * Check if the current connected user is the admin
+   * Check if the current caller is admin (uses backend is_admin function)
    */
   async isCurrentUserAdmin(): Promise<boolean> {
     try {
-      const currentUser = await this.getCurrentUserPrincipal();
-      if (!currentUser) {
-        return false;
-      }
-
-      const admin = await this.getAdminPrincipal();
-      if (!admin) {
-        return false;
-      }
-
-      return currentUser.toText() === admin.toText();
+      console.log("🔍 Checking if current user is admin...");
+      const result = await backendService.isAdmin();
+      console.log("🔍 Admin check result:", result);
+      return result;
     } catch (error) {
-      console.error("Failed to check admin status:", error);
+      console.error("❌ Failed to check admin status:", error);
       return false;
     }
   }
@@ -46,7 +36,9 @@ class AdminAuthServiceImpl implements AdminAuthService {
       }
       // For development, return the test principal when wallet is connected
       // In production, this should use proper ICP wallet integration
-      return Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai");
+      return Principal.fromText(
+        "hu4mr-xdpm5-tho4x-tyiqd-nl4og-yiavx-ftzje-toyfl-vwavt-fbpbq-7ae",
+      );
     } catch (error) {
       console.error("Failed to get current user principal:", error);
       return null;
@@ -54,32 +46,35 @@ class AdminAuthServiceImpl implements AdminAuthService {
   }
 
   /**
-   * Get the admin principal (with caching)
+   * Set admin principal (only current admin can do this)
    */
-  async getAdminPrincipal(): Promise<Principal | null> {
-    const now = Date.now();
-
-    // Use cached value if still valid
-    if (this.adminPrincipal && now - this.lastCheck < this.CACHE_DURATION) {
-      return this.adminPrincipal;
-    }
-
+  async setAdmin(principal: Principal): Promise<string> {
     try {
-      this.adminPrincipal = await PredictionMarketService.getAdmin();
-      this.lastCheck = now;
-      return this.adminPrincipal;
+      const result = await backendService.setAdmin(principal);
+      if ("Ok" in result) {
+        return result.Ok;
+      } else {
+        throw new Error(`Failed to set admin: ${Object.keys(result.Err)[0]}`);
+      }
     } catch (error) {
-      console.error("Failed to get admin principal:", error);
-      return null;
+      console.error("Failed to set admin:", error);
+      throw error;
     }
   }
 
   /**
-   * Clear cache (useful when admin changes)
+   * Get admin principal from backend
    */
-  clearCache(): void {
-    this.adminPrincipal = null;
-    this.lastCheck = 0;
+  async getAdminPrincipal(): Promise<Principal | null> {
+    try {
+      console.log("🔍 Getting admin principal...");
+      const result = await backendService.getAdmin();
+      console.log("🔍 Admin principal result:", result);
+      return result;
+    } catch (error) {
+      console.error("❌ Failed to get admin principal:", error);
+      return null;
+    }
   }
 }
 

@@ -1,21 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { PredictionMarketService } from "../services/predictionMarket";
-
-interface MarketSummary {
-  market: {
-    id: number;
-    title: string;
-    description: string;
-    status: any;
-    result?: any;
-    yes_pool: number;
-    no_pool: number;
-  };
-  yes_price: number;
-  no_price: number;
-  total_volume: number;
-}
+import {
+  PredictionMarketService,
+  type MarketSummary,
+} from "../services/predictionMarket";
 
 export function MarketListView() {
   const [markets, setMarkets] = useState<MarketSummary[]>([]);
@@ -86,12 +74,30 @@ export function MarketListView() {
       {/* Header Section */}
       <div className="text-center">
         <h1 className="text-gradient mb-2 text-3xl font-bold">
-          Prediction Markets
+          🎬 AMM Prediction Markets (Demo)
         </h1>
         <p className="mx-auto max-w-2xl text-sm text-white/70">
-          Trade on the future with decentralized prediction markets powered by
-          the Internet Computer
+          Trade on the future with automated market maker prediction markets
+          powered by the Internet Computer. Prices adjust automatically based on
+          supply and demand.
         </p>
+      </div>
+
+      {/* Demo Banner */}
+      <div className="glass-hover rounded-2xl border border-yellow-400/20 bg-yellow-50/10 p-4 backdrop-blur-xl">
+        <div className="flex items-center justify-center space-x-3">
+          <span className="text-2xl">🚀</span>
+          <div className="text-center">
+            <p className="font-semibold text-yellow-300">
+              Hackathon Demo Mode Active
+            </p>
+            <p className="text-sm text-yellow-200/80">
+              Perfect for presentations! Easy admin access & instant market
+              creation
+            </p>
+          </div>
+          <span className="text-2xl">🎯</span>
+        </div>
       </div>
 
       {markets.length === 0 ? (
@@ -204,18 +210,49 @@ function MarketCard({ marketSummary }: { marketSummary: MarketSummary }) {
           </div>
         </div>
 
-        {/* Volume - more compact */}
-        <div className="mb-2 flex items-center justify-between text-xs text-white/60">
-          <span>Volume</span>
-          <span className="font-bold text-white">
-            {total_volume > 1000
-              ? `${(total_volume / 1000).toFixed(1)}k`
-              : total_volume}
+        {/* Volume and AMM info - more compact */}
+        <div className="mb-2 grid grid-cols-2 gap-2 text-xs text-white/60">
+          <div className="flex justify-between">
+            <span>Volume</span>
+            <span className="font-bold text-white">
+              {Number(total_volume) > 1000
+                ? `${(Number(total_volume) / 1000).toFixed(1)}k`
+                : Number(total_volume)}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span>Liquidity</span>
+            <span className="font-bold text-white">
+              {Number(market.icp_liquidity_pool) > 1000
+                ? `${(Number(market.icp_liquidity_pool) / 1000).toFixed(1)}k`
+                : market.icp_liquidity_pool}{" "}
+              ICP
+            </span>
+          </div>
+        </div>
+
+        {/* AMM indicator */}
+        <div className="mb-2 flex items-center justify-center">
+          <span className="inline-flex items-center rounded-full border border-purple-400/30 bg-purple-500/20 px-2 py-1 text-xs font-bold text-purple-300">
+            <svg
+              className="mr-1 h-3 w-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
+            AMM Powered
           </span>
         </div>
 
         {/* Result display for closed markets */}
-        {!isOpen && market.result && (
+        {!isOpen && market.winning_outcome && (
           <div className="text-center">
             <span className="inline-flex items-center rounded-full border border-blue-400/30 bg-blue-500/20 px-3 py-1 text-xs font-bold text-blue-300">
               <svg
@@ -231,7 +268,12 @@ function MarketCard({ marketSummary }: { marketSummary: MarketSummary }) {
                   d="M9 12l2 2 4-4"
                 />
               </svg>
-              {PredictionMarketService.getSideDisplay(market.result)}
+              {market.winning_outcome.length > 0
+                ? market.winning_outcome[0] &&
+                  "Yes" in market.winning_outcome[0]
+                  ? "YES"
+                  : "NO"
+                : ""}
             </span>
           </div>
         )}
