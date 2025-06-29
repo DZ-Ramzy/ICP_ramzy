@@ -1,302 +1,399 @@
-# 🧪🔥 Ultimate IC Vibe Coding Template
+# 🎯 ICP Prediction Market dApp
 
-This template was built for the **IC Vibe Coding Bootcamp (Rust Edition)** and it's meant to be used in Advance Challenge or in a future Hackathon.
+**A decentralized prediction market platform built on the Internet Computer Protocol (ICP) with Automated Market Maker (AMM) mechanics and AI-powered market analysis.**
 
-## Welcome! 👋
-
-This repository offers a high-quality, production-ready template to jumpstart your Internet Computer (ICP) development.
-
-It includes:
-
-- 🦀 **Rust-based Canister** backend
-- ⚛️ **React + Tailwind + Typescript** frontend
-- 🤖 **IC LLM Canister** integration for Agentic workflows
-- 🧪 **Full Test Suite**: Vitest + PocketIC for backend and frontend
-- 🔁 **CI/CD** with GitHub Actions for automated tests and code quality
-- 🤖 **Copilot Integration** to auto-generate tests, code, and changelogs
-
-Whether you're building full-stack dapps or agents, this template gives you a solid foundation to start fast and scale smoothly. 🚀
-
-![Template Screenshot](.github/assets/template-screenshot.png)
+[![CI/CD](https://github.com/DZ-Ramzy/ICP_ramzy/actions/workflows/e2e.yml/badge.svg)](https://github.com/DZ-Ramzy/ICP_ramzy/actions)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![ICP](https://img.shields.io/badge/platform-Internet%20Computer-green.svg)](https://internetcomputer.org/)
 
 ---
 
-## 📜 Table of Contents
+## 🌟 Features
 
-- [🎥 Recording](#-recording)
-- [🚀 Getting Started](#-getting-started)
-- [📁 Project Structure](#-project-structure)
-- [✅ Testing Patterns](#-testing-patterns)
-- [🔄 CI/CD Workflow](#-cicd-workflow)
-- [🧠 GitHub Copilot Integration](#-github-copilot-integration)
-- [🔗 Resources & Documentation](#-learning-resources)
-- [📩 Submit Your Project!](#-submit-your-project)
+### 🔄 **Automated Market Maker (AMM)**
+
+- **Constant Product Formula**: Dynamic pricing using `x * y = k` mechanism
+- **Dynamic Token Pricing**: Prices automatically adjust based on trading activity
+- **Liquidity Pools**: Decentralized liquidity with 0.3% trading fees
+- **Slippage Protection**: Built-in MEV protection with minimum output guarantees
+
+### 🎯 **Prediction Markets**
+
+- **Binary Markets**: YES/NO token trading for any prediction
+- **Market Creation**: Anyone can create markets with initial ICP deposit
+- **Admin Controls**: Market resolution and management functions
+- **Reward Distribution**: Proportional ICP payouts to winning token holders
+
+### 🤖 **AI-Powered Analytics**
+
+- **LLM Integration**: Ollama-powered market sentiment analysis
+- **Real-time Insights**: AI-generated market reports and risk assessments
+- **Price Impact Calculator**: Advanced trading simulations and predictions
+
+### 💼 **User Experience**
+
+- **Modern React Interface**: Responsive design with Tailwind CSS
+- **Real-time Updates**: Live market data and price feeds
+- **Wallet Integration**: Seamless ICP token management
+- **Trading Dashboard**: Complete portfolio and position tracking
 
 ---
 
-## 🎥 Recording
+## 🚀 Quick Start
 
-There was an Advanced Challenge Lab session, that was recorded and had a lot of information and showcase of Vibe Coding using this template.
+### Prerequisites
 
-You can see here the full recording: https://www.youtube.com/watch?v=ZuNUy13wmlI
+- **Node.js** (v20+)
+- **DFX** (v0.16.1+)
+- **Rust** (stable)
+- **Ollama** (for AI features)
 
----
-
-## 🚀 Getting Started
-
-### 🧑‍💻 1. Get Codespace Ready
-
-A **devcontainer** is preconfigured for you to start coding instantly!
-
-- Click on "Use this Template" → "Create a new repository".
-- Click "Code → Open with Codespaces"
-- Change machine type to 4-core 16GB RAM • 32GB
-- Once the codespace is created, you can open it in VS Code Local
-- Everything is pre-installed and ready for you to run the following commands
-
-### 2. Install Dependencies
+### 1. Clone & Setup
 
 ```bash
+git clone https://github.com/your-username/ICP_ramzy.git
+cd ICP_ramzy
 npm install
 ```
 
-### 3. Running Ollama
-
-To be able to test the agent locally, you'll need a server for processing the agent's prompts. For that, we'll use `ollama`, which is a tool that can download and serve LLMs.
-See the documentation on the [Ollama website](https://ollama.com/). Run:
+### 2. Start Ollama (for AI features)
 
 ```bash
+# Start Ollama server
 ollama serve
-# Expected to start listening on port 11434
-```
 
-The above command will start the Ollama server, so that it can process requests by the agent. Additionally, and in a separate window, run the following command to download the LLM that will be used by the agent:
-
-```bash
+# Download the LLM model (in another terminal)
 ollama run llama3.1:8b
+# Type /bye to exit once loaded
 ```
 
-Once the command executes and the model is loaded, you can terminate it by typing /bye. You won't need to do this step again.
-
-### 4. Deployment
-
-Then, in one terminal window, run:
+### 3. Deploy to ICP
 
 ```bash
+# Start local ICP network
 dfx start --clean
-```
 
-Keep this tab open for reading logs.
+# Deploy canisters
+dfx deploy
 
-Then pull the dependency and deploy the canisters in another window:
-
-```bash
-dfx deploy # deploys the backend and frontend canisters
-```
-
-```bash
+# Deploy LLM canister
 dfx deps pull
-dfx deps deploy  # deploys the llm canister
+dfx deps deploy
 ```
 
-### 5. Start the Development Server
-
-You can start the frontend development server with:
+### 4. Start Frontend
 
 ```bash
-# Just the frontend development server
 npm start
-
+# Access at http://localhost:5174
 ```
 
-### 6. Run Tests
+---
+
+## 🏗️ Architecture
+
+```
+src/
+├── backend/                 # Rust canister backend
+│   ├── src/lib.rs          # AMM core logic
+│   └── Cargo.toml          # Rust dependencies
+├── frontend/               # React + TypeScript frontend
+│   ├── src/
+│   │   ├── components/     # Reusable UI components
+│   │   ├── services/       # Canister integration services
+│   │   └── views/          # Page components
+│   └── package.json
+└── declarations/           # Auto-generated canister interfaces
+```
+
+### Core Components
+
+- **🦀 Backend Canister**: Rust-based AMM smart contract
+- **⚛️ Frontend**: React with TypeScript and Tailwind CSS
+- **🤖 LLM Integration**: AI-powered market analysis
+- **🧪 Test Suite**: Comprehensive PocketIC and Vitest tests
+
+---
+
+## 💡 How It Works
+
+### 1. **Market Creation**
+
+```rust
+// Anyone can create a prediction market
+create_market(
+    "Will Bitcoin reach $100k by 2025?",
+    "Yes if BTC >= $100,000 by Dec 31, 2025",
+    5000 // Initial ICP liquidity
+)
+```
+
+### 2. **Token Trading**
+
+```rust
+// Buy YES tokens using AMM formula
+buy_yes_tokens(market_id, icp_amount, min_tokens_out)
+
+// Sell tokens back to the pool
+sell_yes_tokens(market_id, token_amount, min_icp_out)
+```
+
+### 3. **Market Resolution**
+
+```rust
+// Admin resolves market with outcome
+resolve_market(market_id, TokenType::Yes)
+
+// Users claim proportional rewards
+claim_reward(market_id)
+```
+
+### 4. **AI Analysis**
+
+```rust
+// Get AI-powered market insights
+analyze_market(market_id) // Returns sentiment analysis
+```
+
+---
+
+## 🎮 Usage Examples
+
+### Creating Your First Market
+
+1. **Connect Wallet**: Use the wallet integration to connect
+2. **Deposit ICP**: Add funds to your trading balance
+3. **Create Market**: Set title, description, and initial liquidity
+4. **Start Trading**: Buy YES/NO tokens based on your predictions
+
+### Trading Mechanics
+
+- **Dynamic Pricing**: Prices change based on token reserves
+- **Trading Fees**: 0.3% fee goes to the liquidity pool
+- **Price Impact**: Large trades have proportional price impact
+- **Slippage Protection**: Set minimum outputs to protect against MEV
+
+### Claiming Rewards
+
+1. **Wait for Resolution**: Market admin resolves with final outcome
+2. **Check Position**: Verify your winning token balance
+3. **Claim Rewards**: Receive ICP proportional to your winning tokens
+
+---
+
+## 🧪 Testing
+
+### Run All Tests
 
 ```bash
 npm test
 ```
 
-You can also run:
+### Backend Tests (PocketIC)
 
 ```bash
-npm test tests/src/backend.test.ts    # individual test
+npm test tests/src/backend.test.ts
+```
+
+### Frontend Tests (Vitest)
+
+```bash
+cd src/frontend && npm test
+```
+
+### Test Coverage
+
+- ✅ AMM trading mechanics
+- ✅ Market creation and resolution
+- ✅ Reward distribution
+- ✅ Edge cases and error handling
+- ✅ Frontend component integration
+
+---
+
+## 📊 AMM Mathematics
+
+The platform uses the **Constant Product** formula for automated market making:
+
+```
+x * y = k
+
+Where:
+- x = YES token reserve
+- y = NO token reserve
+- k = constant product (liquidity)
+```
+
+### Price Calculation
+
+```
+YES price = NO_reserve / (YES_reserve + NO_reserve)
+NO price = YES_reserve / (YES_reserve + NO_reserve)
+```
+
+### Trade Execution
+
+```
+new_x = k / (y + tokens_out)
+tokens_in = new_x - x
+```
+
+_See [AMM_DOCUMENTATION.md](AMM_DOCUMENTATION.md) for detailed mathematics._
+
+---
+
+## 🔧 Configuration
+
+### Environment Variables
+
+```bash
+# Ollama API endpoint
+OLLAMA_BASE_URL=http://localhost:11434
+
+# Network configuration
+DFX_NETWORK=local
+```
+
+### Canister Settings
+
+```json
+{
+  "INITIAL_LIQUIDITY": 500,
+  "TRADE_FEE": 3,
+  "MIN_DEPOSIT": 1000
+}
 ```
 
 ---
 
-## 📁 Project Structure
+## 🛠️ Development
 
-```
-ICP-Bootcamp-Vibe-Coding/
-├── .devcontainer/devcontainer.json       # Container config for running your own codespace
-├── .github/instructions/                 # Copilot general and language specific instructions
-├── .github/prompts/                      # Copilot Prompts, like add feature and changes review
-├── .github/workflows/                    # GitHub CI/CD pipelines
-├── src/
-│   ├── backend/                          # Rust backend canister
-│   │   ├── src/
-│   │   │   └── lib.rs                    # Main Rust file
-│   │   └── Cargo.toml                    # Rust dependencies
-│   ├── frontend/                         # React + Tailwind + TypeScript frontend
-│   │   ├── src/
-│   │   │   ├── App.tsx                   # Main App component
-│   │   │   ├── index.css                 # Global styles with Tailwind
-│   │   │   ├── components/               # Reusable UI components
-│   │   │   ├── services/                 # Canister service layers
-│   │   │   └── views/                    # Page-level components
-│   │   ├── assets/                       # Static assets (images, icons)
-│   │   ├── tests/                        # Frontend unit tests
-│   │   ├── index.html                    # Frontend entry point
-│   │   ├── main.tsx                      # React main file
-│   │   ├── package.json                  # Frontend dependencies
-│   │   ├── tsconfig.json                 # TypeScript configuration
-│   │   ├── vite.config.ts                # Vite build configuration
-│   │   └── vite-env.d.ts                 # Vite type definitions
-│   └── declarations/                     # Auto-generated canister interfaces
-├── tests/
-│   ├── src/                              # Backend test files
-│   ├── backend-test-setup.ts             # PocketIC instance
-│   └── vitest.config.ts                  # Vitest configuration
-├── scripts/
-│   ├── dev-container-setup.sh            # Extra set up steps for codespace
-│   └── generate-candid.sh                # Useful one way script to build, generate candid and did files
-├── dfx.json                              # ICP config
-├── Cargo.toml                            # Root Rust workspace config
-└── CHANGELOG.md
+### Backend Development
+
+```bash
+# Check Rust code
+cargo check
+
+# Generate Candid interfaces
+npm run generate-candid
+
+# Format code
+cargo fmt
 ```
 
----
+### Frontend Development
 
-## 🔄 CI/CD Workflow
+```bash
+# Start dev server
+npm start
 
-Located under `.github/workflows/`, this includes:
+# Type checking
+npx tsc --noEmit
 
-- 🧪 Automated end-2-end test runs
-
-It could be extended to:
-
-- check for security updates (audit);
-- test coverage;
-- code quality.
-
----
-
-## 🧠 **GitHub Copilot Integration**
-
-This project leverages two key customization folders:
-
-- `.github/instructions/` – Provides essential context to guide AI responses.
-- `.github/prompts/` – Defines workflow prompts to effectively assist you.
-
-Think of the AI as a super-fast junior developer, handling the heavy lifting while you focus on quality control. Instead of using PRs, you’re reviewing and refining code directly in the IDE through Copilot chat.
-
-### 📝 **About Instructions**
-
-Instructions provide "context" that applies to specific files using regex patterns defined in `applyTo`. They are ideal for project-wide or language-specific guidance.
-
-**Current Instructions:**
-
-- **general:** `applyTo: **`
-- **rust:** `applyTo: */*.rs`
-- **test:** `applyTo: tests/**`
-
-**Examples of Context You Can Define:**
-
-- This is an ICP project using Rust canisters.
-- For Rust, we follow Clippy and Rust FMT style guides and linting tools.
-- For tests, we use **Pocket IC** and maintain a specific test structure.
-
-### 🛠️ **About Prompts**
-
-Prompts define specific tasks and guide the AI through a structured workflow. They are especially useful for maintaining a consistent development process.
-
----
-
-#### ✨ **Add Feature Prompt**
-
-```markdown
-/add-feature Add a function to decrease the counter value
+# Lint and format
+npm run format
 ```
 
-In this workflow, Copilot follows a Spec Driven Workflow:
+### Code Quality
 
-1. Clarification Phase:
-   • Updates the changelog and asks for any necessary clarifications.
-2. Test First Approach:
-   • Generates a test case and ensures it fails, confirming that the test is effectively targeting the desired behavior.
-3. Human Confirmation:
-   • The AI pauses for a human to review and confirm the spec, ensuring alignment before proceeding.
-4. Implementation Phase:
-   • Implements the code, self-checks for errors, installs necessary libraries, lints, formats, and runs tests to confirm they pass.
+- **Prettier**: TypeScript/JavaScript formatting
+- **Rust-analyzer**: Rust formatting and linting
+- **Clippy**: Rust best practices
+- **Husky**: Pre-commit hooks
 
-**✅ Key Takeaways**
+---
 
-When you explore the prompt, please notice:
+## 🚢 Deployment
 
-- CRITICAL PAUSE POINTS
-  - Strategic pauses allow the human to verify the work in small, reviewable chunks and redirect if necessary.
-- Command Explanations
-  - The prompt can include specific commands or scripts, guiding the AI in self-checking, running scripts, or managing dependencies.
-- Task-Specific Advice
-  - The prompt is the place to add any specific guidance or notes relevant only to the particular task at hand.
+### Local Development
 
-#### 🚧 **Changes Review Prompt**
-
-To run a review, simply call the prompt:
-
-```markdown
-/changes-review
+```bash
+dfx start --clean
+dfx deploy
+npm start
 ```
 
-The AI will analyze the current git diffs, then reference other files in the repo for context. It will generate a comprehensive report for you to review before committing.
+### IC Mainnet
 
-#### ✅ **Focus Areas**
+```bash
+dfx deploy --network ic
+```
 
-1. **Business Logic:**
+### Vercel Frontend
 
-   - Detects potential unwanted side effects or missing edge cases.
-
-2. **Code Quality:**
-
-   - Suggests improvements or refactor opportunities.
-
-3. **Security & Performance:**
-   - Identifies vulnerabilities or inefficiencies.
-
-#### 📌 **Why It Matters**
-
-- AI can handle the heavy lifting, but it's **your responsibility as the Senior** to validate the findings.
-- Double-check and ensure quality – small issues now can become big problems later. 😉
+```bash
+npm run build
+# Deploy dist/ folder to Vercel
+```
 
 ---
 
-## 📚 Learning Resources
+## 📈 Roadmap
 
-- [Instruction and Prompt Files](https://code.visualstudio.com/docs/copilot/copilot-customization)
-- [Agent Mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode)
-- [Copilot Reference](https://code.visualstudio.com/docs/copilot/reference/copilot-vscode-features)
-- [ICP Dev Docs](https://internetcomputer.org/docs)
-- [Rust CDK](https://internetcomputer.org/docs/current/developer-docs/backend/rust/)
-- [PicJS Doc](https://dfinity.github.io/pic-js/)
-- [Vitest Testing Framework](https://vitest.dev/)
+### ✅ **Current Features**
 
----
+- [x] AMM-based prediction markets
+- [x] Dynamic token pricing
+- [x] AI-powered market analysis
+- [x] Modern React interface
+- [x] Comprehensive test suite
 
-### 🤝 **Contributing**
+### 🔄 **In Progress**
 
-We welcome contributions! If you encounter a bug, have a feature request, or want to suggest improvements, please open an issue or submit a Pull Request.
+- [ ] Advanced charting and analytics
+- [ ] Multi-outcome markets (beyond binary)
+- [ ] Liquidity provider rewards
+- [ ] Mobile app
 
-We especially welcome candidates of limits you face, consider using the **Limit Candidate Form Issue** – it helps us prioritize and address the most impactful limits effectively.
+### 🎯 **Future Plans**
 
----
-
-## 📩 Submit Your Project!
-
-🎯 **Completed your challenge? Submit your project here:**  
-📢 [Submission Form](TODO)
-
-📌 **Want to explore more challenges? Return to the index:**  
-🔗 [IC Vibathon Index](https://github.com/pt-icp-hub/IC-Vibathon-Index)
+- [ ] Cross-chain integration
+- [ ] Governance token
+- [ ] Advanced AI trading bots
+- [ ] Social features and leaderboards
 
 ---
 
-**Now go build something fast, tested, and production-ready 🚀🦀**
+## 🤝 Contributing
+
+We welcome contributions! Here's how to get started:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Development Guidelines
+
+- Follow existing code style
+- Add tests for new features
+- Update documentation
+- Run `npm run format` before committing
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **Internet Computer Protocol** for the blockchain infrastructure
+- **Ollama** for AI integration capabilities
+- **IC Vibe Coding Bootcamp** for inspiration and template
+- **Community** for feedback and contributions
+
+---
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/DZ-Ramzy/ICP_ramzy/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/DZ-Ramzy/ICP_ramzy/discussions)
+- **Documentation**: [Wiki](https://github.com/DZ-Ramzy/ICP_ramzy/wiki)
+
+---
+
+**Ready to predict the future? Start trading! 🚀📈**

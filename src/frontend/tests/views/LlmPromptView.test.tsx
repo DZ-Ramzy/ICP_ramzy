@@ -14,33 +14,45 @@ describe("LlmPromptView", () => {
   it("should display disabled LLM interface", async () => {
     // Setup & Execute
     await act(async () => {
-      render(<LlmPromptView onError={mockOnError} setLoading={mockSetLoading} />);
+      render(
+        <LlmPromptView onError={mockOnError} setLoading={mockSetLoading} />,
+      );
     });
 
     // Assert
     expect(screen.getByText("LLM Prompt (DISABLED)")).toBeInTheDocument();
     expect(
-      screen.getByText("⚠️ LLM functionality is not available in the current backend")
+      screen.getByText(
+        "⚠️ LLM functionality is not available in the current backend",
+      ),
     ).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("LLM functionality is disabled...")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("LLM functionality is disabled..."),
+    ).toBeInTheDocument();
     expect(screen.getByText("Send Prompt")).toBeInTheDocument();
   });
 
   it("should have disabled textarea", async () => {
     // Setup & Execute
     await act(async () => {
-      render(<LlmPromptView onError={mockOnError} setLoading={mockSetLoading} />);
+      render(
+        <LlmPromptView onError={mockOnError} setLoading={mockSetLoading} />,
+      );
     });
 
     // Assert
-    const textarea = screen.getByPlaceholderText("LLM functionality is disabled...");
+    const textarea = screen.getByPlaceholderText(
+      "LLM functionality is disabled...",
+    );
     expect(textarea).toBeDisabled();
   });
 
   it("should not call LLM service when disabled", async () => {
     // Setup & Execute
     await act(async () => {
-      render(<LlmPromptView onError={mockOnError} setLoading={mockSetLoading} />);
+      render(
+        <LlmPromptView onError={mockOnError} setLoading={mockSetLoading} />,
+      );
     });
 
     // Assert - should not have called any LLM methods since feature is disabled
